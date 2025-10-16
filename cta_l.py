@@ -333,16 +333,6 @@ class TrainGetter():
         # exact match
         if station_name in self.name_to_index:
             return self.name_to_index[station_name]
-        # try matching keys without parenthesis e.g. "Garfield (Red)" -> "Garfield"
-        name_no_paren = station_name.split(" (")[0]
-        for k in self.name_to_index:
-            if k.split(" (")[0] == name_no_paren:
-                return self.name_to_index[k]
-        # substring match (fallback)
-        for k in self.name_to_index:
-            if station_name in k or k in station_name:
-                return self.name_to_index[k]
-        # unknown
         return -1
 
     def _seconds_until_arrival(self, prdt_str: str, arrt_str: str) -> float:
