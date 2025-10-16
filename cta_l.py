@@ -36,14 +36,14 @@ directions = {
     'Yellow': (0, -1)
 }
 colors = {
-    'Red': '\033[38;2;255;255;255;48;2;198;12;48m',
-    'Blue': '\033[38;2;255;255;255;48;2;0;161;222m',
-    'Brown': '\033[38;2;255;255;255;48;2;98;54;27m',
-    'Green': '\033[38;2;255;255;255;48;2;0;155;58m',
-    'Orange': '\033[38;2;255;255;255;48;2;249;70;28m',
-    'Purple': '\033[38;2;255;255;255;48;2;82;35;152m',
-    'Pink': '\033[38;2;255;255;255;48;2;226;126;166m',
-    'Yellow': '\033[38;2;0;0;0;48;2;249;227;0m'
+    'Red': '\033[1;38;2;255;255;255;48;2;198;12;48m',
+    'Blue': '\033[1;38;2;255;255;255;48;2;0;161;222m',
+    'Brown': '\033[1;38;2;255;255;255;48;2;98;54;27m',
+    'Green': '\033[1;38;2;255;255;255;48;2;0;155;58m',
+    'Orange': '\033[1;38;2;255;255;255;48;2;249;70;28m',
+    'Purple': '\033[1;38;2;255;255;255;48;2;82;35;152m',
+    'Pink': '\033[1;38;2;255;255;255;48;2;226;126;166m',
+    'Yellow': '\033[1;38;2;0;0;0;48;2;249;227;0m'
 }
 
 route_id = line_to_route_id[args.line]
@@ -346,9 +346,9 @@ class TrainGetter():
         return -1
 
     def _seconds_until_arrival(self, prdt_str: str, arrt_str: str) -> float:
-        # CTA timestamps are local Chicago times (no zone). Make them timezone-aware
-        # using America/Chicago before converting to epoch so comparisons with
-        # time.time() are correct regardless of system timezone.
+        # Try zone-aware path first (preferred). If ZoneInfo or tzdata is missing
+        # on the system, fall back to a best-effort calculation using CTA's
+        # predicted travel time (arrT - prdt) minus estimated staleness.
         try:
             tz = ZoneInfo("America/Chicago")
             prd = datetime.fromisoformat(prdt_str)
@@ -358,14 +358,23 @@ class TrainGetter():
                 prd = prd.replace(tzinfo=tz)
             if arr.tzinfo is None:
                 arr = arr.replace(tzinfo=tz)
-            # remaining seconds until arrival relative to now
-            now = time.time()
-            remaining = arr.timestamp() - now
-            if remaining < 0:
-                return 0.0
-            return remaining
+            remaining = arr.timestamp() - time.time()
+            return max(0.0, remaining)
         except Exception:
-            return 0.0
+            # Fallback: some systems lack zoneinfo/tzdata. Compute:
+            # remaining = (arr - prd) - staleness_estimate
+            # where staleness_estimate = now - prd (prd interpreted as system local
+            # time via time.mktime). This can be off if system timezone != Chicago,
+            # but it's preferable to returning 0 for all trains.
+            try:
+                prd = datetime.fromisoformat(prdt_str)
+                arr = datetime.fromisoformat(arrt_str)
+                cta_seconds = (arr - prd).total_seconds()
+                staleness = time.time() - time.mktime(prd.timetuple())
+                remaining = cta_seconds - staleness
+                return max(0.0, remaining)
+            except Exception:
+                return 0.0
 
     def get_trains(self, json_str) -> List[Train]:
         api_dict = json.loads(json_str)
