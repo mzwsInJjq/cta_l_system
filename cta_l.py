@@ -346,9 +346,9 @@ class TrainGetter():
         return -1
 
     def _seconds_until_arrival(self, prdt_str: str, arrt_str: str) -> float:
-        # Try zone-aware path first (preferred). If ZoneInfo or tzdata is missing
-        # on the system, fall back to a best-effort calculation using CTA's
-        # predicted travel time (arrT - prdt) minus estimated staleness.
+        # CTA timestamps are local Chicago times (no zone). Make them timezone-aware
+        # using America/Chicago before converting to epoch so comparisons with
+        # time.time() are correct regardless of system timezone.
         try:
             tz = ZoneInfo("America/Chicago")
             prd = datetime.fromisoformat(prdt_str)
@@ -358,23 +358,14 @@ class TrainGetter():
                 prd = prd.replace(tzinfo=tz)
             if arr.tzinfo is None:
                 arr = arr.replace(tzinfo=tz)
-            remaining = arr.timestamp() - time.time()
-            return max(0.0, remaining)
-        except Exception:
-            # Fallback: some systems lack zoneinfo/tzdata. Compute:
-            # remaining = (arr - prd) - staleness_estimate
-            # where staleness_estimate = now - prd (prd interpreted as system local
-            # time via time.mktime). This can be off if system timezone != Chicago,
-            # but it's preferable to returning 0 for all trains.
-            try:
-                prd = datetime.fromisoformat(prdt_str)
-                arr = datetime.fromisoformat(arrt_str)
-                cta_seconds = (arr - prd).total_seconds()
-                staleness = time.time() - time.mktime(prd.timetuple())
-                remaining = cta_seconds - staleness
-                return max(0.0, remaining)
-            except Exception:
+            # remaining seconds until arrival relative to now
+            now = time.time()
+            remaining = arr.timestamp() - now
+            if remaining < 0:
                 return 0.0
+            return remaining
+        except Exception:
+            return 0.0
 
     def get_trains(self, json_str) -> List[Train]:
         api_dict = json.loads(json_str)
