@@ -333,11 +333,19 @@ class TrainGetter():
         # exact match
         if station_name in self.name_to_index:
             return self.name_to_index[station_name]
-        # try matching keys without parenthesis e.g. "Garfield (Red)" -> "Garfield"
-        name_no_paren = station_name.split(" (")[0]
-        for k in self.name_to_index:
-            if k.split(" (")[0] == name_no_paren:
-                return self.name_to_index[k]
+        # try matching keys without parentheses e.g. "Garfield (Red)" -> "Garfield"
+        # or, for Blue Line stations with "Branch" in station_name, try adding the line color while retaining the parentheses
+        # (The Blue Line is the only line in Chicago with more than one station having the exact same name.)
+        if "(" in station_name:
+            if args.line == "Blue" and "Branch" in station_name:
+                name_w_color = station_name.split(" (")[0] + "Blue - " + station_name.split(" (")[1]
+                for k in self.name_to_index:
+                    if k == name_w_color:
+                        return self.name_to_index[k]
+            name_no_paren = station_name.split(" (")[0]
+            for k in self.name_to_index:
+                if k.split(" (")[0] == name_no_paren:
+                    return self.name_to_index[k]
         # substring match (fallback)
         for k in self.name_to_index:
             if station_name in k or k in station_name:
