@@ -338,6 +338,11 @@ class TrainGetter():
         for k in self.name_to_index:
             if k.split(" (")[0] == name_no_paren:
                 return self.name_to_index[k]
+        # substring match (fallback)
+        for k in self.name_to_index:
+            if station_name in k or k in station_name:
+                return self.name_to_index[k]
+        # unknown
         raise KeyError(f"unknown station: {station_name}")
 
     def _seconds_until_arrival(self, prdt_str: str, arrt_str: str) -> float:
