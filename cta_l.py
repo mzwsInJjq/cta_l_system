@@ -344,7 +344,7 @@ class TrainGetter():
                         return self.name_to_index[k]
             name_no_paren = station_name.split(" (")[0]
             for k in self.name_to_index:
-                if k.split("(")[0] == name_no_paren:
+                if k.split(" (")[0] == name_no_paren:
                     return self.name_to_index[k]
         # substring match (fallback)
         for k in self.name_to_index:
