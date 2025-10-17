@@ -338,13 +338,13 @@ class TrainGetter():
         # (The Blue Line is the only line in Chicago with more than one station having the exact same name.)
         if "(" in station_name:
             if args.line == "Blue" and "Branch" in station_name:
-                name_w_color = station_name.split(" (")[0] + "Blue - " + station_name.split(" (")[1]
+                name_w_color = station_name.split("(")[0] + "Blue - " + station_name.split("(")[1]
                 for k in self.name_to_index:
                     if k == name_w_color:
                         return self.name_to_index[k]
             name_no_paren = station_name.split(" (")[0]
             for k in self.name_to_index:
-                if k.split(" (")[0] == name_no_paren:
+                if k.split("(")[0] == name_no_paren:
                     return self.name_to_index[k]
         # substring match (fallback)
         for k in self.name_to_index:
