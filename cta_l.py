@@ -25,16 +25,6 @@ line_to_route_id = {
     'Pink': 'pink',
     'Yellow': 'y'
 }
-directions = {
-    'Red': (0, -1),
-    'Blue': (0, -1),
-    'Brown': (0, -1),
-    'Green': (0, -1),
-    'Orange': (0, -1),
-    'Purple': (0, -1),
-    'Pink': (0, -1),
-    'Yellow': (0, -1)
-}
 colors = {
     'Red': '\033[1;38;2;255;255;255;48;2;198;12;48m',
     'Blue': '\033[1;38;2;255;255;255;48;2;0;161;222m',
@@ -356,8 +346,9 @@ class TrainGetter():
                 continue
 
         print(colors[args.line] + f"{args.line} Line" + "\033[0m")
-        for t_sorted in sorted(out, key=lambda x: (-self.stop_id_to_index[x.next_station_index][0] + (1 if x.direction_id == 1 else 0), x.time_until)):
+        for t_sorted in sorted(out, key=lambda x: ((-self.stop_id_to_index[x.next_station_index][0] + (1 if x.direction_id == "1" else 0), ((-1 if x.direction_id == "1" else 0)) * x.time_until))):
             print(t_sorted)
+            # print((-self.stop_id_to_index[t_sorted.next_station_index][0] + (1 if t_sorted.direction_id == "1" else 0), ((-1 if t_sorted.direction_id == "1" else 0)) * t_sorted.time_until))
         return out
 
 if __name__ == "__main__":
