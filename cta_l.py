@@ -201,7 +201,7 @@ class TrainGetter():
                     41150: [2, "Kedzie (Orange)"],
                     40310: [3, "Western (Orange)"],
                     40120: [4, "35th/Archer"],
-                    40170: [5, "Ashland (Green/Pink)"],
+                    40160: [5, "Ashland (Orange)"],
                     41130: [6, "Halsted (Orange)"],
                     41400: [7, "Roosevelt"],
                     40850: [8, "Harold Washington Library-State/Van Buren"],
