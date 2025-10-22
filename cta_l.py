@@ -346,9 +346,9 @@ class TrainGetter():
                 continue
 
         print(colors[args.line] + f"{args.line} Line" + "\033[0m")
-        for t_sorted in sorted(out, key=lambda x: ((-self.stop_id_to_index[x.next_station_index][0] + (1 if x.direction_id == "1" else 0), ((-1 if x.direction_id == "1" else 1)) * x.time_until))):
+        for t_sorted in sorted(out, key=lambda x: ((-self.stop_id_to_index[x.next_station_index][0] + (1 if x.direction_id == "1" else 0), ((-1 if x.direction_id == "1" else 0)) * x.time_until))):
             print(t_sorted)
-            # print((-self.stop_id_to_index[t_sorted.next_station_index][0] + (1 if t_sorted.direction_id == "1" else 0), ((-1 if t_sorted.direction_id == "1" else 1)) * t_sorted.time_until))
+            # print((-self.stop_id_to_index[t_sorted.next_station_index][0] + (1 if t_sorted.direction_id == "1" else 0), ((-1 if t_sorted.direction_id == "1" else 0)) * t_sorted.time_until))
         return out
 
 if __name__ == "__main__":
