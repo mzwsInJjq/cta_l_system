@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import argparse
 import requests
 import json
@@ -351,9 +352,9 @@ class TrainGetter():
             return (self.stop_id_to_index[x.next_station_index][0] - 0.5) if x.direction_id == "1" else (self.stop_id_to_index[x.next_station_index][0] + 0.5)
 
         print(colors[args.line] + f"{args.line} Line" + "\033[0m")
-        for t_sorted in sorted(out, key=lambda x: ((-northness(x), ((-1 if x.direction_id == "1" else 1)) * x.time_until))):
+        for t_sorted in sorted(out, key=lambda x: ((-northness(x), (1 if x.direction_id == "1" else -1) * x.time_until))):
             print(t_sorted)
-            # print((-northness(t_sorted), ((-1 if t_sorted.direction_id == "1" else 1)) * t_sorted.time_until)))
+            print((-northness(t_sorted), (1 if t_sorted.direction_id == "1" else -1) * t_sorted.time_until))
         return out
 
 if __name__ == "__main__":
@@ -365,4 +366,4 @@ if __name__ == "__main__":
         
     else:
         print("Request failed")
-        exit()
+        sys.exit(1)
