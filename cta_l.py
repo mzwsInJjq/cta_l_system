@@ -51,8 +51,8 @@ class Train():
 
     def __str__(self):
         return f"""
-{ colors[args.line] + self.direction + "\033[0m" } { "\033[1;44m" + str(self.vehicle_id) + "\033[0m" }
-{ "\033[1;33m" + self.next_station } in {round(self.time_until)}s\033[0m"""
+{ colors[args.line] + self.direction + "\033[0m" } { "\033[1;44m" + self.vehicle_id + "\033[0m" }
+{ "\033[1;33m" + self.next_station + "\033[0m" } in {round(self.time_until)}s"""
 
 class TrainGetter():
     def __init__(self) -> None:
@@ -345,10 +345,15 @@ class TrainGetter():
                 print(f"Error processing train {t.get('rn','?')}: {e}")
                 continue
 
+        def northness(x: Train) -> float:
+            if x.next_station_index < 0:
+                return float("-inf")
+            return (self.stop_id_to_index[x.next_station_index][0] - 0.5) if x.direction_id == "1" else (self.stop_id_to_index[x.next_station_index][0] + 0.5)
+
         print(colors[args.line] + f"{args.line} Line" + "\033[0m")
-        for t_sorted in sorted(out, key=lambda x: ((-self.stop_id_to_index[x.next_station_index][0] + (1 if x.direction_id == "1" else 0), ((-1 if x.direction_id == "1" else 1)) * x.time_until))):
+        for t_sorted in sorted(out, key=lambda x: ((-northness(x), ((-1 if x.direction_id == "1" else 1)) * x.time_until))):
             print(t_sorted)
-            # print((-self.stop_id_to_index[t_sorted.next_station_index][0] + (1 if t_sorted.direction_id == "1" else 0), ((-1 if t_sorted.direction_id == "1" else 1)) * t_sorted.time_until))
+            # print((-northness(t_sorted), ((-1 if t_sorted.direction_id == "1" else 1)) * t_sorted.time_until)))
         return out
 
 if __name__ == "__main__":
